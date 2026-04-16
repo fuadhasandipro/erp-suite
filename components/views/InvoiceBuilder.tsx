@@ -1,7 +1,7 @@
 "use client";
 import { useAppContext } from "@/context/AppContext";
 import { useState } from "react";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripHorizontal, Plus, Settings2, Trash2 } from "lucide-react";
@@ -39,6 +39,7 @@ export default function InvoiceBuilder() {
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
@@ -100,7 +101,8 @@ export default function InvoiceBuilder() {
     };
 
     return (
-        <div className="bg-white border text-sm border-slate-100 rounded-2xl p-4 sm:p-8 shadow-[0_2px_20px_rgb(0,0,0,0.02)]" id="invoice-card">
+        <>
+        <div className="bg-white border text-sm border-slate-100 rounded-2xl p-4 sm:p-8 shadow-[0_2px_20px_rgb(0,0,0,0.02)] print:hidden" id="invoice-card">
             
             <div className={`flex flex-col sm:flex-row justify-between items-start mb-8 sm:mb-12 gap-8 ${settings.logoPos === 'right' ? 'sm:flex-row-reverse sm:text-right' : ''}`}>
                 <div className="w-full sm:flex-1">
@@ -273,5 +275,86 @@ export default function InvoiceBuilder() {
                 </button>
             </div>
         </div>
+
+        {/* --- PRINT TEMPLATE --- */}
+        <div className="hidden print:block print:bg-white print:text-black">
+            <div className="flex justify-between items-start mb-10">
+                <div>
+                    {(settings.logoPos === 'left' ? logoLeft : logoRight) && <img src={(settings.logoPos === 'left' ? logoLeft : logoRight) || undefined} className="max-h-20 mb-4" />}
+                    <h1 className="text-3xl font-bold">{settings.company}</h1>
+                </div>
+                <div className="text-right">
+                    <h2 className="text-5xl font-black mb-3 text-slate-800 tracking-tighter uppercase">Invoice</h2>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm justify-items-end">
+                        <span className="font-semibold text-slate-500 uppercase tracking-widest text-xs">Invoice #</span>
+                        <span>{settings.prefix}{String(invCounter).padStart(4, "0")}</span>
+                        <span className="font-semibold text-slate-500 uppercase tracking-widest text-xs">Date</span>
+                        <span>{today}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="mb-10">
+                <div className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Billed To</div>
+                <div className="text-xl font-bold">{billTo || "—"}</div>
+            </div>
+
+            <table className="w-full text-left border-collapse mb-10">
+                <thead>
+                    <tr className="border-b-2 border-slate-800 text-sm">
+                        {columns.filter(c => c.on && c.id !== 'action').map(c => (
+                            <th key={c.id} className="py-3 px-2 font-bold uppercase tracking-wider text-xs text-slate-600">{c.label}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows.map((row, idx) => (
+                        <tr key={idx} className="border-b border-slate-200 text-sm">
+                            {columns.filter(c => c.on && c.id !== 'action').map(c => (
+                                <td key={c.id} className="py-3 px-2 font-medium">
+                                    {c.id === 'sl' && <span>{idx + 1}</span>}
+                                    {c.id === 'sku' && <span>{row.sku}</span>}
+                                    {c.id === 'desc' && <span>{row.desc}</span>}
+                                    {c.id === 'qty' && <span>{row.qty}</span>}
+                                    {c.id === 'price' && <span>{row.price}</span>}
+                                    {c.id === 'disc' && <span>{row.disc}%</span>}
+                                    {c.id === 'total' && <span className="font-bold">{settings.currency} {(row.qty * row.price * (1 - row.disc / 100)).toFixed(2)}</span>}
+                                    {c.isCustom && <span>{row[c.id]}</span>}
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
+            <div className="flex justify-end mb-12">
+                <div className="w-72">
+                    <div className="flex justify-between border-b border-slate-200 py-2 text-sm">
+                        <span className="font-semibold text-slate-500">Subtotal</span>
+                        <span className="font-medium">{settings.currency} {subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-slate-200 py-2 text-sm">
+                        <span className="font-semibold text-slate-500">Discount ({discount}%)</span>
+                        <span className="font-medium">- {settings.currency} {(subtotal * (discount / 100)).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-slate-200 py-2 text-sm">
+                        <span className="font-semibold text-slate-500">Tax ({settings.tax}%)</span>
+                        <span className="font-medium">+ {settings.currency} {taxAmt.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between py-3 text-2xl font-black mt-2 bg-slate-50 px-3 rounded-lg border border-slate-200">
+                        <span>Total</span>
+                        <span>{settings.currency} {total.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+
+            {settings.notes && (
+                <div className="mt-8 pt-8 border-t border-slate-200">
+                    <div className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Notes / Terms</div>
+                    <div className="text-sm whitespace-pre-wrap font-medium">{settings.notes}</div>
+                </div>
+            )}
+        </div>
+        </>
     );
 }

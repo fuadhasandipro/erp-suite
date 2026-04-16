@@ -13,7 +13,7 @@ export default function Topbar() {
     const handleClear = () => updateState({ rows: [] });
 
     return (
-        <header className="bg-[var(--background)] px-4 md:px-8 py-4 md:py-5 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md bg-opacity-80 border-b border-slate-200 lg:border-none">
+        <header className="bg-[var(--background)] px-4 md:px-8 py-4 md:py-5 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md bg-opacity-80 border-b border-slate-200 lg:border-none print:hidden">
             <div className="flex items-center gap-2 md:gap-3">
                 <button onClick={() => updateState({ isMobileMenuOpen: true })} className="lg:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
                     <Menu size={20} />

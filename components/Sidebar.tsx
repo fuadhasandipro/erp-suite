@@ -20,11 +20,11 @@ export default function Sidebar() {
         <>
             {isMobileMenuOpen && (
                 <div 
-                    className="fixed inset-0 bg-slate-900/40 z-20 lg:hidden backdrop-blur-sm transition-opacity"
+                    className="fixed inset-0 bg-slate-900/40 z-20 lg:hidden backdrop-blur-sm transition-opacity print:hidden"
                     onClick={() => updateState({ isMobileMenuOpen: false })}
                 />
             )}
-            <div className={`fixed inset-y-0 left-0 z-30 w-64 shrink-0 bg-[var(--background)] border-r border-slate-200/60 flex flex-col pt-6 pb-4 transform transition-transform duration-300 lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <div className={`fixed inset-y-0 left-0 z-30 w-64 shrink-0 bg-[var(--background)] border-r border-slate-200/60 flex flex-col pt-6 pb-4 transform transition-transform duration-300 lg:relative lg:translate-x-0 print:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="px-6 mb-8 flex items-center justify-between">
                     <div className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
                         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm shadow-sm">
