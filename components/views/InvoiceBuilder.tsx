@@ -18,11 +18,13 @@ function SortableHeader({ column, children }: { column: any, children: React.Rea
     };
 
     return (
-        <th ref={setNodeRef} style={style} className={`block sm:table-cell p-2 sm:p-3 font-semibold text-slate-600 bg-white sm:bg-slate-50/80 rounded-lg sm:rounded-none border sm:border-transparent border-slate-200 group whitespace-nowrap shadow-sm sm:shadow-none ${isDragging ? 'shadow-xl bg-blue-50 ring-2 ring-blue-400 opacity-80' : ''}`}>
+        <th ref={setNodeRef} style={style} className={`${column.id === 'action' ? 'hidden sm:table-cell' : 'block sm:table-cell'} p-2 sm:p-3 font-semibold text-slate-600 bg-white sm:bg-slate-50/80 rounded-lg sm:rounded-none border sm:border-transparent border-slate-200 group whitespace-nowrap shadow-sm sm:shadow-none ${isDragging ? 'shadow-xl bg-blue-50 ring-2 ring-blue-400 opacity-80' : ''}`}>
             <div className="flex items-center gap-2">
-                <button {...attributes} {...listeners} className="touch-none cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-600 transition-colors bg-white p-1.5 sm:p-1 rounded md:border border-slate-200 hover:border-slate-300 shadow-sm opacity-70 group-hover:opacity-100 flex items-center justify-center">
-                    <GripHorizontal size={16} />
-                </button>
+                {column.id !== 'action' && (
+                    <button {...attributes} {...listeners} className="touch-none cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-600 transition-colors bg-white p-1.5 sm:p-1 rounded md:border border-slate-200 hover:border-slate-300 shadow-sm opacity-70 group-hover:opacity-100 flex items-center justify-center">
+                        <GripHorizontal size={16} />
+                    </button>
+                )}
                 {children}
             </div>
         </th>
