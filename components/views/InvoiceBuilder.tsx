@@ -10,7 +10,7 @@ import { GripHorizontal, Plus, Settings2, Trash2 } from "lucide-react";
 function SortableHeader({ column, children }: { column: any, children: React.ReactNode }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: column.id });
     const style = {
-        transform: CSS.Transform.toString(transform),
+        transform: CSS.Translate.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
         zIndex: isDragging ? 10 : 1,
